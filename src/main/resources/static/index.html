@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Tracker | Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 15px;
+            margin-top: 0;
+            font-size: 24px;
+        }
+        h3 {
+            color: #4a5568;
+            margin-top: 0;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        input, select, button {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        input { flex: 2; }
+        select { flex: 1; background-color: #fff; }
+
+        .submit-btn {
+            background-color: #3182ce;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .submit-btn:hover { background-color: #2b6cb0; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #edf2f7;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        .status-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .status-btn:hover { background: #38a169; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Project Dashboard</h1>
+
+    <div class="section">
+        <h3>Log New Track</h3>
+        <form id="taskForm">
+            <div class="form-row">
+                <input type="text" id="taskName" placeholder="Track Title" required>
+                <select id="taskGenre">
+                    <option value="Trap">Trap</option>
+                    <option value="EDM">EDM</option>
+                    <option value="Orchestral">Orchestral</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">Save to Database</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h3>Active Projects</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Track Title</th>
+                <th>Genre</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="taskList">
+            <!-- JavaScript will inject database rows here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_URL = '/api/tasks';
+
+    async function fetchTasks() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error("Backend not responding");
+
+            const tasks = await response.json();
+            const tbody = document.getElementById('taskList');
+            tbody.innerHTML = '';
+
+            tasks.forEach(task => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${task.id}</td>
+                    <td><strong>${task.title}</strong></td>
+                    <td>${task.project}</td>
+                    <td>${task.status}</td>
+                    <td>
+                        <button class="status-btn" onclick="alert('Ready to wire up UPDATE logic!')">Mark Done</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+        }
+    }
+
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const newTask = {
+            title: document.getElementById('taskName').value,
+            project: document.getElementById('taskGenre').value
+        };
+
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTask)
+            });
+            document.getElementById('taskForm').reset();
+            fetchTasks();
+        } catch (error) {
+            console.error('Error saving task:', error);
+        }
+    });
+
+    window.onload = fetchTasks;
+</script>
+</body>
+</html>

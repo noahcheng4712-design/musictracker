@@ -1,6 +1,5 @@
 package com.noah.musictracker;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -13,18 +12,22 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class TaskController {
-    private final List<MusicTask> tasks = new ArrayList<>();
-    private long nextId = 1;
+
+    private final TaskRepository repository;
+
+    // Injecting the SQLite Repository
+    public TaskController(TaskRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping("/api/tasks")
-    public synchronized List<MusicTask> getTasks() {
-        return List.copyOf(tasks);
+    public List<MusicTask> getTasks() {
+        return repository.findAll(); // Fetches directly from SQLite
     }
 
     @PostMapping("/api/tasks")
     @ResponseStatus(HttpStatus.CREATED)
-    public synchronized MusicTask createTask(
-            @RequestBody CreateTaskRequest request) {
+    public MusicTask createTask(@RequestBody CreateTaskRequest request) {
 
         if (request.getTitle() == null || request.getTitle().isBlank()
                 || request.getProject() == null
@@ -35,14 +38,7 @@ public class TaskController {
             );
         }
 
-        MusicTask task = new MusicTask(
-                nextId++,
-                request.getTitle().trim(),
-                request.getProject().trim(),
-                "TODO"
-        );
-
-        tasks.add(task);
-        return task;
+        // Saves directly to SQLite
+        return repository.create(request.getTitle().trim(), request.getProject().trim());
     }
 }

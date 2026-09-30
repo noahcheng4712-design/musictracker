@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS music_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    project TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'TODO'
+);
