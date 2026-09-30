@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+
 @Repository
 public class TaskRepository {
     private final JdbcTemplate jdbc;
@@ -35,6 +36,11 @@ public class TaskRepository {
         return jdbc.queryForObject(sql, this::mapRow, title, project);
     }
 
+    public void markTaskDone(long id) {
+        String sql = "UPDATE music_tasks SET status = 'DONE' WHERE id = ?";
+        jdbc.update(sql, id);
+    }
+
     private MusicTask mapRow(ResultSet row, int rowNumber)
             throws SQLException {
         return new MusicTask(
@@ -43,5 +49,9 @@ public class TaskRepository {
                 row.getString("project"),
                 row.getString("status")
         );
+    }
+    public void delete(long id) {
+        String sql = "DELETE FROM music_tasks WHERE id = ?";
+        jdbc.update(sql, id);
     }
 }
